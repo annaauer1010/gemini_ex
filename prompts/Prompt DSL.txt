@@ -1,0 +1,31 @@
+Lies den Text in der Spalte Text und analysiere folgende Aspekte: 1. **Gerichtstyp**:
+Unterscheide, ob es sich um einen Entscheid eines Oberlandesgerichts (OLG) oder
+eines Landgerichts (LG) handelt. Dies sollte im Text bei der Urteilsangabe erwähnt
+sein (z. B. OLG, LG). Hier sollen nur die Begriffe OLG und LG extrahiert werden, der
+Name der Stadt wird nicht benötigt. 2. **Geldbetrag oder Abweisung**: Überprüfe in
+der Spalte Text, ob im Abschnitt Tenor ein Geldbetrag genannt wird, den der Kläger
+als Schadensersatz erhält, oder ob die Klage abgewiesen wurde. Dies steht zu
+Beginn des Abschnitts Tenor und wird vor dem Abschnitt Gründe festgelegt. Der
+Betrag wird in der Regel in Euro ohne Zinsen angegeben (z. B. 25.900 EUR) und
+steht zu Beginn des Abschnitts Tenor. Gebe mir nur den Betrag in Euro aus (z.B.
+23542,23 EUR). Falls kein Betrag vorhanden ist und die Klage abgewiesen wurde
+(hierbei wird im Text vermittelt, dass die Klage des 'Klägers/-in' oder der 'Klagepartei'
+abgelehnt wurde. Auch kann im Text stehen, dass die Berufung der Klagepartei
+abgewiesen oder zurückgewiesen wurde.), soll dies als Klage abgewiesen angezeigt
+werden. Achte darauf, dass der Streitwert nicht extrahiert wird.
+Sollte jedoch in dem Abschnitt Tenor nichts zu die Klage des Klägers bzw. der
+Klägerin wird abgewiesen oder der Kläger bzw. die Klägerin erhält Anspruch auf
+Schadensersatz stehen, sondern es wird ein anderes Verfahren betrachtet bzw. ein
+Ablehnungsgesuch der oder des Beklagten wird verworfen, es wird eine
+Streitwertfestsetzung betrachtet, es wird eine Gerichtsstandbestimmung erwähnt
+oder abgelehnt oder eine Entscheidung des Senats thematisiert, dann gebe dies als
+Sonstige aus. Achte dabei vor allem darauf, ob im Text Streitwertfestsetzung
+(einschließlich dessen Ablehnung), Ablehnungsgesuch oder Entscheid des Senats
+thematisiert und ausgeführt wird. Dies sind Indizien für die Kategorie 'Sonstige'.
+Handelt es sich um die Kategorie 'Sonstige', dann gib mit an, woran du dies
+festgemacht hast.
+Könntest du mir die Ergebnisse in einer JSON-Datei wie dieser zurückgeben. Diese
+soll folgende Struktur haben:'[{'Gerichtstyp':'Bestimmung des Gerichtstyps';
+'Urteil':'Ergebnis der Bestimmung des Urteils'}]'. Es soll immer nur der Gerichtstyp
+und das Ergebnis des Urteils ausgegegeben werden. (z.B. Gerichtstyp: OLG, Urteil:
+23.522,43 EUR). Und die Tabelle soll nur einen Eintrag haben.
