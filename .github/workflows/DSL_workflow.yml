@@ -8,30 +8,38 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # Build the Docker image
+    # Docker-Image bauen
     - name: Build the Docker image
       run: docker build -t gemini_ex/gha_gemi .
 
-    # Loop through each .txt file in the open_jur folder and process it
+    # Erstelle ein Ausgabe-Verzeichnis für jede Datei
+    - name: Create Output Directories
+      run: mkdir -p $GITHUB_WORKSPACE/output/files
+
+    # Verarbeite alle .txt-Dateien im open_jur Ordner
     - name: Docker Run Action for All Files
       run: |
-        # Loop through each .txt file in the open_jur folder and process it with Gemini
         for file in $GITHUB_WORKSPACE/open_jur/*.txt; do
-          echo "Processing $file"
+          # Extrahiere den Dateinamen ohne Erweiterung für die Ausgabe
+          filename=$(basename -- "$file")
+          filename_without_extension="${filename%.*}"
 
-          # Run the Gemini API with the appropriate prompt
+          # Verarbeite die Datei mit Gemini und speichere das Ergebnis in einem separaten Ordner
           docker run --rm --name gha_gemi --env API_KEY="${{ secrets.API_KEY }}" \
             -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw \
             -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw \
             -v $GITHUB_WORKSPACE/config/:/root/config/:rw \
             -v $GITHUB_WORKSPACE/open_jur/:/root/open_jur/:rw \
-            -v $GITHUB_WORKSPACE/output:/root/output:rw \
+            -v $GITHUB_WORKSPACE/output/files:/root/output/files:rw \
             gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")' \
             -v $file:/root/open_jur/text.txt  # Mount the current .txt file
+            
+          # Speichere das Ergebnis für jede Datei in einem separaten Ordner
+          mv $GITHUB_WORKSPACE/output/files/text.txt $GITHUB_WORKSPACE/output/files/${filename_without_extension}_result.txt
         done
 
-    # Upload the Gemini results as an artifact
+    # Lade alle Ergebnisse hoch
     - uses: actions/upload-artifact@v4
       with:
         name: gemini_results
-        path: ${{ github.workspace }}/output/
+        path: ${{ github.workspace }}/output/files/
