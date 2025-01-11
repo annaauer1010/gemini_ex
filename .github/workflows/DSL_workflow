@@ -1,0 +1,38 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # Build the Docker image
+    - name: Build the Docker image
+      run: docker build -t gemini_ex/gha_gemi .
+
+    # Run the Docker container for all .txt files in open_jur folder
+    - name: Docker Run Action
+      run: |
+        # Loop through each .txt file in the open_jur folder and process with Gemini
+        for file in $GITHUB_WORKSPACE/open_jur/*.txt; do
+          echo "Processing $file"
+
+          # Run the Gemini API with the appropriate prompt
+          docker run --rm --name gha_gemi --env API_KEY="${{ secrets.API_KEY }}" \
+            -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw \
+            -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw \
+            -v $GITHUB_WORKSPACE/config/:/root/config/:rw \
+            -v $GITHUB_WORKSPACE/open_jur/:/root/open_jur/:rw \  # Mount open_jur folder
+            -v $GITHUB_WORKSPACE/output:/root/output:rw \
+            gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")' \
+            -v $file:/root/open_jur/text.txt  # Pass the current .txt file into the Docker container
+        done
+
+    # Upload the Gemini results as an artifact
+    - uses: actions/upload-artifact@v4
+      with:
+        name: gemini_results
+        path: ${{ github.workspace }}/output/
