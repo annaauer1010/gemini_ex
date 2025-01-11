@@ -48,8 +48,7 @@ if (!FALSE) {
     
     # Ergebnis speichern
     output_json <- paste0("/root/output/", basename(file), "_result.json")
-    output_rds <- paste0("/root/output/", basename(file), "_result.Rds")
-    
+
     saveRDS(res, output_rds)
     try(writeLines(toJSON(res), output_json))
     
