@@ -12,14 +12,13 @@ jobs:
     - name: Ensure necessary directories exist
       run: |
         mkdir -p $GITHUB_WORKSPACE/output
-        mkdir -p $GITHUB_WORKSPACE/output/files
     - name: Docker Run Action
       run: |
         docker run --rm --name gha_gemi --env API_KEY="${{ secrets.API_KEY }}" \
           -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw \
           -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw \
           -v $GITHUB_WORKSPACE/config/:/root/config/:rw \
-          -v $GITHUB_WORKSPACE/open_jur/:/root/open_jur/:rw \
+          -v $GITHUB_WORKSPACE/openjur_docs/:/root/openjur_docs/:rw \
           -v $GITHUB_WORKSPACE/output:/root/output:rw \
           gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")'
     - uses: actions/upload-artifact@v4
