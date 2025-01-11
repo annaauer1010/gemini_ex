@@ -4,7 +4,6 @@ if (!FALSE) {
   perform_analysis()
 }
 
-if (!FALSE) {
   API_KEY = Sys.getenv("API_KEY")
   
   cat("\n\nSTART TEST ANALYS\n\n")
@@ -56,4 +55,4 @@ if (!FALSE) {
   }
 
   cat("\n\nEND TEST ANALYS\n\n")
-}
+
