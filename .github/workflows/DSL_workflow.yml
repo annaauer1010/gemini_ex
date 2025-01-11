@@ -3,7 +3,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -13,10 +12,10 @@ jobs:
     - name: Build the Docker image
       run: docker build -t gemini_ex/gha_gemi .
 
-    # Run the Docker container for all .txt files in open_jur folder
-    - name: Docker Run Action
+    # Loop through each .txt file in the open_jur folder and process it
+    - name: Docker Run Action for All Files
       run: |
-        # Loop through each .txt file in the open_jur folder and process with Gemini
+        # Loop through each .txt file in the open_jur folder and process it with Gemini
         for file in $GITHUB_WORKSPACE/open_jur/*.txt; do
           echo "Processing $file"
 
@@ -25,10 +24,10 @@ jobs:
             -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw \
             -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw \
             -v $GITHUB_WORKSPACE/config/:/root/config/:rw \
-            -v $GITHUB_WORKSPACE/open_jur/:/root/open_jur/:rw \  # Mount open_jur folder
+            -v $GITHUB_WORKSPACE/open_jur/:/root/open_jur/:rw \
             -v $GITHUB_WORKSPACE/output:/root/output:rw \
             gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")' \
-            -v $file:/root/open_jur/text.txt  # Pass the current .txt file into the Docker container
+            -v $file:/root/open_jur/text.txt  # Mount the current .txt file
         done
 
     # Upload the Gemini results as an artifact
