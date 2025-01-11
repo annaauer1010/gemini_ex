@@ -2,31 +2,18 @@ on:
   workflow_dispatch:
 
 jobs:
+
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
-
-    # Build the Docker image
     - name: Build the Docker image
-      run: docker build -t gemini_ex/gha_gemi .
-
-    # Run the Docker container, including openjur_docs folder
+      run: docker build  -t gemini_ex/gha_gemi .
     - name: Docker Run Action
-      run: |
-        # Run the container with the openjur_docs volume
-        docker run --rm --name gha_gemi --env API_KEY="${{ secrets.API_KEY }}" \
-          -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw \
-          -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw \
-          -v $GITHUB_WORKSPACE/config/:/root/config/:rw \
-          -v $GITHUB_WORKSPACE/openjur_docs/:/root/openjur_docs/:rw \  # Mount openjur_docs folder
-          -v $GITHUB_WORKSPACE/output:/root/output:rw \
-          gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")'
-
-    # Upload the Gemini results as an artifact
+      run: docker run --rm --name gha_gemi --env API_KEY="${{ secrets.API_KEY }}" -v $GITHUB_WORKSPACE/scripts/:/root/scripts/:rw -v $GITHUB_WORKSPACE/prompts/:/root/prompts/:rw -v $GITHUB_WORKSPACE/config/:/root/config/:rw  -v $GITHUB_WORKSPACE/output:/root/output:rw gemini_ex/gha_gemi R -e 'Sys.setenv("PATH" = paste(Sys.getenv("PATH"),"/usr/local/stata/",sep=":")); source("~/scripts/run.R")'
     - uses: actions/upload-artifact@v4
       with:
         name: gemini_results
-        path: ${{ github.workspace }}/output/
+        path: ${{ github.workspace }}/output/ 
