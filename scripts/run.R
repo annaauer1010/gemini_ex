@@ -28,7 +28,7 @@ Achte dabei vor allem darauf, ob im Text Streitwertfestsetzung (einschließlich 
 Dies sind Indizien für die Kategorie 'Sonstige'. Handelt es sich um die Kategorie 'Sonstige', dann gib mit an, woran du dies festgemacht hast.
 
 Gebe mir das Ergebnis im folgenden Format zurück:
-[{'Datei': Dateiname; 'Gerichtstyp':'Bestimmung des Gerichtstyps'; 'Urteil':'Ergebnis der Bestimmung des Urteils'}]
+[{'Gerichtstyp':'Bestimmung des Gerichtstyps'; 'Urteil':'Ergebnis der Bestimmung des Urteils'}]
 "
 
 # Liste für alle Ergebnisse
@@ -48,8 +48,13 @@ for (file in files) {
   # Gemini-Prompt ausführen
   res <- run_gemini(full_input, API_KEY, json_mode = TRUE)
   
-  # Füge das Ergebnis zur Liste hinzu
-  all_results <- append(all_results, list(res))
+# Füge das Ergebnis und den Dateinamen zur Liste hinzu
+  result_entry <- list(
+    filename = basename(file), # Nur den Dateinamen, nicht den vollständigen Pfad
+    result = res
+  )
+  
+  all_results <- append(all_results, list(result_entry))
   
   cat("\n\nFinished processing: ", file, "\n\n")
 }
