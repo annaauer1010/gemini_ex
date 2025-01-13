@@ -28,7 +28,7 @@ Achte dabei vor allem darauf, ob im Text Streitwertfestsetzung (einschließlich 
 Dies sind Indizien für die Kategorie 'Sonstige'. Handelt es sich um die Kategorie 'Sonstige', dann gib mit an, woran du dies festgemacht hast.
 
 Gebe mir das Ergebnis im folgenden Format zurück:
-[{'Gerichtstyp':'Bestimmung des Gerichtstyps'; 'Urteil':'Ergebnis der Bestimmung des Urteils'}]
+[{'Datei': Dateiname; 'Gerichtstyp':'Bestimmung des Gerichtstyps'; 'Urteil':'Ergebnis der Bestimmung des Urteils'}]
 "
 
 # Liste für alle Ergebnisse
