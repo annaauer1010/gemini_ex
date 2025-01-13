@@ -12,7 +12,7 @@ cat("\n\nSTART TEST ANALYS\n\n")
 source("~/scripts/gemini_tools.R")
 
 # Definiere das Prompt, das an das Modell übergeben wird
-prompt = """
+prompt = "
 Lies den Text in der Spalte **Text** und analysiere folgende Aspekte:  
 
 1. **Gerichtstyp**:  
@@ -52,7 +52,7 @@ Gib das Ergebnis im folgenden Format zurück:
     'Wiederverkaufswert/Verlust': 'Wiederverkaufswert oder Verlust in EUR'
   }
 ]
-"""  
+"
 
 
 # Liste für alle Ergebnisse
