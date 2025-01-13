@@ -12,24 +12,48 @@ cat("\n\nSTART TEST ANALYS\n\n")
 source("~/scripts/gemini_tools.R")
 
 # Definiere das Prompt, das an das Modell übergeben wird
-prompt <- "
-Lies den Text in der Spalte Text und analysiere folgende Aspekte: 
-1. **Gerichtstyp**: 
-Unterscheide, ob es sich um einen Entscheid eines Oberlandesgerichts (OLG) oder eines Landgerichts (LG) handelt. 
-Dies sollte im Text bei der Urteilsangabe erwähnt sein (z. B. OLG, LG). Hier sollen nur die Begriffe OLG und LG extrahiert werden, der Name der Stadt wird nicht benötigt.
-2. **Geldbetrag oder Abweisung**: Überprüfe in der Spalte Text, ob im Abschnitt Tenor ein Geldbetrag genannt wird, den der Kläger als Schadensersatz erhält, oder ob die Klage abgewiesen wurde. 
-Dies steht zu Beginn des Abschnitts Tenor und wird vor dem Abschnitt Gründe festgelegt. Der Betrag wird in der Regel in Euro ohne Zinsen angegeben (z. B. 25.900 EUR) und steht zu Beginn des Abschnitts Tenor. 
-Gebe mir nur den Betrag in Euro aus (z.B. 23542,23 EUR). Falls kein Betrag vorhanden ist und die Klage abgewiesen wurde (hierbei wird im Text vermittelt, dass die Klage des 'Klägers/-in' oder der 'Klagepartei' abgelehnt wurde), 
-soll dies als Klage abgewiesen angezeigt werden.
-Sollte jedoch in dem Abschnitt Tenor nichts zu die Klage des Klägers bzw. der Klägerin wird abgewiesen oder der Kläger bzw. die Klägerin erhält Anspruch auf Schadensersatz stehen, 
-sondern es wird ein anderes Verfahren betrachtet bzw. ein Ablehnungsgesuch der oder des Beklagten wird verworfen, es wird eine Streitwertfestsetzung betrachtet, 
-es wird eine Gerichtsstandbestimmung erwähnt oder abgelehnt oder eine Entscheidung des Senats thematisiert, dann gebe dies als Sonstige aus. 
-Achte dabei vor allem darauf, ob im Text Streitwertfestsetzung (einschließlich dessen Ablehnung), Ablehnungsgesuch oder Entscheid des Senats thematisiert und ausgeführt wird. 
-Dies sind Indizien für die Kategorie 'Sonstige'. Handelt es sich um die Kategorie 'Sonstige', dann gib mit an, woran du dies festgemacht hast.
+prompt = """
+Lies den Text in der Spalte **Text** und analysiere folgende Aspekte:  
 
-Gebe mir das Ergebnis im folgenden Format zurück:
-[{'Gerichtstyp':'Bestimmung des Gerichtstyps'; 'Urteil':'Ergebnis der Bestimmung des Urteils'}]
-"
+1. **Gerichtstyp**:  
+Unterscheide, ob es sich um einen Entscheid eines Oberlandesgerichts (OLG) oder eines Landgerichts (LG) handelt.  
+Dies sollte im Text bei der Urteilsangabe erwähnt sein (z. B. OLG, LG). Hier sollen nur die Begriffe OLG und LG extrahiert werden, der Name der Stadt wird nicht benötigt.  
+
+2. **Urteil**:  
+Überprüfe in der Spalte **Text**, ob im Abschnitt **Tenor** ein Geldbetrag genannt wird, den der Kläger als Schadensersatz erhält, oder ob die Klage abgewiesen wurde.  
+- Der Betrag wird in der Regel in Euro ohne Zinsen angegeben (z. B. 25.900 EUR) und steht zu Beginn des Abschnitts **Tenor**.  
+- Gib nur den Betrag in Euro aus (z. B. 23542,23 EUR).  
+- Falls kein Betrag vorhanden ist und die Klage abgewiesen wurde (z. B. der Text erwähnt, dass die Klage des 'Klägers/-in' oder der 'Klagepartei' abgelehnt wurde), gib dies als **Klage abgewiesen** an.  
+- Sollte jedoch im Abschnitt **Tenor** nichts zur Klageentscheidung stehen, sondern z. B. eine Streitwertfestsetzung, ein Ablehnungsgesuch, eine Gerichtsstandbestimmung oder eine Entscheidung des Senats thematisiert werden, gib dies als **Sonstige** aus.  
+  - Gib bei **Sonstige** zusätzlich an, woran dies festgemacht wurde (z. B. 'Streitwertfestsetzung erwähnt').  
+
+3. **Zusätzliche Features**:  
+Extrahiere außerdem folgende zusätzliche Informationen aus dem Text, falls verfügbar:  
+   - **Fahrzeugmodell**: Das Modell des im Fall genannten Fahrzeugs (z. B. VW Golf, BMW 3er).  
+   - **Streitwert bzw. Klageforderung**: Der im Verfahren genannte Streitwert oder die geforderte Summe.  
+   - **Kaufdatum**: Das Datum, an dem das Fahrzeug gekauft wurde (z. B. 15.07.2019).  
+   - **Gericht**: Das genaue Gericht, das den Fall behandelt (z. B. Landgericht Stuttgart, Oberlandesgericht München).  
+   - **Bundesland**: Das Bundesland, in dem das Gericht liegt (z. B. Baden-Württemberg, Bayern).  
+   - **Baujahr**: Das Baujahr des Fahrzeugs (z. B. 2015).  
+   - **Wiederverkaufswert bzw. Verlust dabei**: Der Wiederverkaufswert des Fahrzeugs oder der erlittene Verlust (z. B. Wiederverkaufswert: 12.500 EUR, Verlust: 8.000 EUR).  
+
+Gib das Ergebnis im folgenden Format zurück:  
+
+[
+  {
+    'Gerichtstyp': 'Bestimmung des Gerichtstyps',
+    'Urteil': 'Ergebnis der Bestimmung des Urteils',
+    'Fahrzeugmodell': 'Modell des Fahrzeugs',
+    'Streitwert/Klageforderung': 'Streitwert oder Klageforderung in EUR',
+    'Kaufdatum': 'Datum des Kaufs (TT.MM.JJJJ)',
+    'Gericht': 'Name des Gerichts',
+    'Bundesland': 'Bundesland des Gerichts',
+    'Baujahr': 'Baujahr des Fahrzeugs',
+    'Wiederverkaufswert/Verlust': 'Wiederverkaufswert oder Verlust in EUR'
+  }
+]
+"""  
+
 
 # Liste für alle Ergebnisse
 all_results <- list()
