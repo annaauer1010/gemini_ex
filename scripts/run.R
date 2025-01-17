@@ -6,7 +6,7 @@ if (!FALSE) {
 
 API_KEY = Sys.getenv("API_KEY")
 
-cat("\n\nSTART TEST ANALYS\n\n")
+cat("\n\nSTART TEST ANALYSIS\n\n")
 
 # Quelle des Tools für Gemini
 source("~/scripts/gemini_tools.R")
@@ -21,42 +21,8 @@ Dies sollte im Text bei der Urteilsangabe erwähnt sein (z. B. OLG, LG). Hier so
 
 2. **Urteil**:  
 Überprüfe in der Spalte **Text**, ob im Abschnitt **Tenor** ein Geldbetrag genannt wird, den der Kläger als Schadensersatz erhält, oder ob die Klage abgewiesen wurde.  
-- Der Betrag wird in der Regel in Euro ohne Zinsen angegeben (z. B. 25.900 EUR) und steht zu Beginn des Abschnitts **Tenor**.  
-- Gib nur den Betrag in Euro aus (z. B. 23542,23 EUR).  
-- Falls kein Betrag vorhanden ist und die Klage abgewiesen wurde (z. B. der Text erwähnt, dass die Klage des 'Klägers/-in' oder der 'Klagepartei' abgelehnt wurde), gib dies als **Klage abgewiesen** an.  
-- Sollte jedoch im Abschnitt **Tenor** nichts zur Klageentscheidung stehen, sondern z. B. eine Streitwertfestsetzung, ein Ablehnungsgesuch, eine Gerichtsstandbestimmung oder eine Entscheidung des Senats thematisiert werden, gib dies als **Sonstige** aus.  
-  - Gib bei **Sonstige** zusätzlich an, woran dies festgemacht wurde (z. B. 'Streitwertfestsetzung erwähnt').  
-
-3. **Zusätzliche Features**:  
-Extrahiere außerdem folgende zusätzliche Informationen aus dem Text, falls verfügbar:  
-   - **Fahrzeugmodell**: Das Modell des im Fall genannten Fahrzeugs (z. B. VW Golf, BMW 3er).  
-   - **Streitwert bzw. Klageforderung**: Der im Verfahren genannte Streitwert oder die geforderte Summe.  
-   - **Kaufdatum**: Das Datum, an dem das Fahrzeug gekauft wurde (z. B. 15.07.2019).  
-   - **Gericht**: Das genaue Gericht, das den Fall behandelt (z. B. Landgericht Stuttgart, Oberlandesgericht München).  
-   - **Bundesland**: Das Bundesland, in dem das Gericht liegt (z. B. Baden-Württemberg, Bayern).  
-   - **Baujahr**: Das Baujahr des Fahrzeugs (z. B. 2015).  
-   - **Wiederverkaufswert bzw. Verlust dabei**: Der Wiederverkaufswert des Fahrzeugs oder der erlittene Verlust (z. B. Wiederverkaufswert: 12.500 EUR, Verlust: 8.000 EUR).  
-
-Gib das Ergebnis im folgenden Format zurück:  
-
-[
-  {
-    'Gerichtstyp': 'Bestimmung des Gerichtstyps',
-    'Urteil': 'Ergebnis der Bestimmung des Urteils',
-    'Fahrzeugmodell': 'Modell des Fahrzeugs',
-    'Streitwert/Klageforderung': 'Streitwert oder Klageforderung in EUR',
-    'Kaufdatum': 'Datum des Kaufs (TT.MM.JJJJ)',
-    'Gericht': 'Name des Gerichts',
-    'Bundesland': 'Bundesland des Gerichts',
-    'Baujahr': 'Baujahr des Fahrzeugs',
-    'Wiederverkaufswert/Verlust': 'Wiederverkaufswert oder Verlust in EUR'
-  }
-]
+[...]  
 "
-
-
-# Liste für alle Ergebnisse
-all_results <- list()
 
 # Alle .txt-Dateien im Verzeichnis '/root/openjur_docs' einlesen
 files <- list.files(path = "/root/openjur_docs/", pattern = "*.txt", full.names = TRUE)
@@ -72,22 +38,19 @@ for (file in files) {
   # Gemini-Prompt ausführen
   res <- run_gemini(full_input, API_KEY, json_mode = TRUE)
   
-# Füge das Ergebnis und den Dateinamen zur Liste hinzu
+  # Ergebnis als Liste speichern
   result_entry <- list(
-    filename = basename(file), # Nur den Dateinamen, nicht den vollständigen Pfad
+    filename = basename(file), # Nur den Dateinamen
     result = res
   )
   
-  all_results <- append(all_results, list(result_entry))
+  # Speichere die Ergebnisse der aktuellen Datei als .Rds
+  output_rds <- file.path("/root/output", paste0(tools::file_path_sans_ext(basename(file)), ".Rds"))
+  saveRDS(result_entry, output_rds)
   
-  cat("\n\nFinished processing: ", file, "\n\n")
+  cat("\n\nFinished processing and saved to: ", output_rds, "\n\n")
 }
 
-# Speichern der gesamten Ergebnismenge in einer JSON-Datei
-output_json <- "/root/output/all_results.json"
+cat("\n\nEND TEST ANALYSIS\n\n")
 
-# Versuche, alle Ergebnisse in eine einzelne JSON-Datei zu schreiben
-try(writeLines(toJSON(all_results, pretty = TRUE), output_json))
-
-cat("\n\nEND TEST ANALYS\n\n")
 
